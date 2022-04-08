@@ -4,6 +4,7 @@ data/*.csv
 *.ipynb
 .~lock*
 *.sh
+!scripts/*.sh
 data/old/*.csv
 __pycache__/
 stats_old.py

@@ -1,36 +1,8 @@
 #!/bin/bash
 
-pg_ctl start > /dev/null
-createdb default > /dev/null
-
-gender=${gender:-men}
-format=${format:-test}
 min_runs=${min_runs:-1000}
 
 read -r -d '' sql <<SQL
-CREATE TABLE innings (
-  index integer,
-  player text,
-  team text,
-  runs integer,
-  runs_txt text,
-  not_out boolean,
-  mins numeric,
-  bf numeric,
-  fours numeric,
-  sixes numeric,
-  sr numeric,
-  pos integer,
-  innings integer,
-  opposition text,
-  ground text,
-  start_date date
-);
-
-COPY innings
-FROM '$(pwd)/data/${gender}_${format}_batting.csv'
-WITH (FORMAT csv, HEADER);
-
 WITH
 cumulative AS (
   SELECT
@@ -62,11 +34,6 @@ FROM lowest_cumulative_averages
 WHERE total_runs > ${min_runs}
 ORDER BY lowest_cumulative_average DESC
 LIMIT 10;
-
-DROP TABLE innings;
 SQL
 
-echo $sql | psql -q -d default
-
-dropdb default > /dev/null
-pg_ctl stop > /dev/null
+./run_sql.sh "${sql}"
