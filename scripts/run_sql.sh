@@ -6,6 +6,8 @@ createdb default > /dev/null
 gender=${gender:-men}
 format=${format:-test}
 
+absolute_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 read -r -d '' sql <<SQL
 CREATE TABLE innings (
   index integer,
@@ -27,7 +29,7 @@ CREATE TABLE innings (
 );
 
 COPY innings
-FROM '$(pwd)/../data/${gender}_${format}_batting.csv'
+FROM '${absolute_dir}/../data/${gender}_${format}_batting.csv'
 WITH (FORMAT csv, HEADER);
 
 $1

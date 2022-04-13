@@ -68,4 +68,6 @@ WHERE rank <= 3 AND pos BETWEEN 3 and 11
 ORDER BY pos, rank;
 SQL
 
-./run_sql.sh "${sql}"
+dir="$(dirname "${BASH_SOURCE[0]}")"
+
+"${dir}/run_sql.sh" "${sql}"

@@ -37,4 +37,6 @@ ORDER BY total DESC
 LIMIT 100;
 SQL
 
-./run_sql.sh "${sql}"
+dir="$(dirname "${BASH_SOURCE[0]}")"
+
+"${dir}/run_sql.sh" "${sql}"
