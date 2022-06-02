@@ -1,25 +1,27 @@
 #!/bin/bash
 
+type=${type:-game}
+
 read -r -d '' sql <<SQL
 WITH
-outs AS (
+all_outs AS (
   SELECT
     ground,
     start_date,
-    player,
+    innings,
     team,
-    runs,
-    CASE WHEN not_out THEN 0 ELSE 1 END AS outs
-  FROM innings
+    runs
+  FROM team_innings
+  WHERE all_out
 ),
 forty_wickets AS (
   SELECT
     ground,
     start_date,
     SUM(runs) AS game_runs
-  FROM outs
+  FROM all_outs
   GROUP BY ground, start_date
-  HAVING SUM(outs) = 40
+  HAVING COUNT(*) = 4
 ),
 twenty_wickets AS (
   SELECT
@@ -27,9 +29,9 @@ twenty_wickets AS (
     start_date,
     team,
     SUM(runs) AS team_runs
-  FROM outs
+  FROM all_outs
   GROUP BY ground, start_date, team
-  HAVING SUM(outs) = 20
+  HAVING COUNT(*) = 2
 ),
 game_bannermen AS (
   SELECT

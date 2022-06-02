@@ -2,28 +2,15 @@
 
 read -r -d '' sql <<SQL
 WITH
-outs AS (
+all_outs AS (
   SELECT
     ground,
     start_date,
-    player,
-    team,
-    runs,
-    pos,
     innings,
-    CASE WHEN not_out THEN 0 ELSE 1 END AS outs
-  FROM innings
-),
-ten_wickets AS (
-  SELECT
-    ground,
-    start_date,
     team,
-    innings,
-    SUM(runs) AS team_runs
-  FROM outs
-  GROUP BY ground, start_date, team, innings
-  HAVING SUM(outs) = 10
+    runs
+  FROM team_innings
+  WHERE all_out
 ),
 bannermen_by_position AS (
   SELECT
@@ -33,22 +20,15 @@ bannermen_by_position AS (
     innings.player,
     innings.pos,
     innings.innings,
-    SUM(innings.runs) AS runs,
-    MIN(ten_wickets.team_runs) AS team_runs,
-    SUM(innings.runs)::numeric(20, 10) / MIN(ten_wickets.team_runs)::numeric(20, 10) AS proportion
+    innings.runs AS runs,
+    all_outs.runs AS team_runs,
+    (innings.runs::numeric(20, 10) / all_outs.runs::numeric(20, 10))::numeric(20, 2) AS proportion
   FROM innings
-  INNER JOIN ten_wickets ON
-    innings.ground = ten_wickets.ground AND
-    innings.start_date = ten_wickets.start_date AND
-    innings.team = ten_wickets.team AND
-    innings.innings = ten_wickets.innings
-  GROUP BY
-    innings.ground,
-    innings.start_date,
-    innings.team,
-    innings.player,
-    innings.pos,
-    innings.innings
+  INNER JOIN all_outs ON
+    innings.ground = all_outs.ground AND
+    innings.start_date = all_outs.start_date AND
+    innings.team = all_outs.team AND
+    innings.innings = all_outs.innings
 )
 SELECT *
 FROM (
@@ -60,7 +40,7 @@ FROM (
     player,
     runs,
     team_runs,
-    proportion::numeric(20, 2)
+    proportion
   FROM bannermen_by_position
   WHERE runs IS NOT NULL
 ) ranked
