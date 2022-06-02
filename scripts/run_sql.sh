@@ -46,12 +46,34 @@ CREATE TABLE bowling_innings (
   start_date date
 );
 
+CREATE TABLE team_innings (
+  index integer,
+  team text,
+  score text,
+  runs integer,
+  overs numeric,
+  bpo integer,
+  rpo numeric,
+  lead integer,
+  all_out boolean,
+  declared boolean,
+  result text,
+  innings integer,
+  opposition text,
+  ground text,
+  start_date date
+);
+
 COPY innings
 FROM '${absolute_dir}/../data/${gender}_${format}_batting.csv'
 WITH (FORMAT csv, HEADER);
 
 COPY bowling_innings
 FROM '${absolute_dir}/../data/${gender}_${format}_bowling.csv'
+WITH (FORMAT csv, HEADER);
+
+COPY team_innings
+FROM '${absolute_dir}/../data/${gender}_${format}_team.csv'
 WITH (FORMAT csv, HEADER);
 
 $1
