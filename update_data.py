@@ -212,12 +212,21 @@ def scrape_pages():
             more_results = True
             while more_results:
                 print(f"Scraping page {page_num}")
-                
-                soup = getpage(page_num, f, activity)
-                more_results, df, can_append = parse_page(df, soup, activity, f, last_row, can_append, data_types)
-                # put a sleep in there so we don't hammer the cricinfo site too much
-                time.sleep(0.5)
-                page_num += 1
+
+                try:
+                    soup = getpage(page_num, f, activity)
+
+                    more_results, df, can_append = parse_page(df, soup, activity, f, last_row, can_append, data_types)
+
+                    # put a sleep in there so we don't hammer the cricinfo site too much
+                    time.sleep(0.5)
+                    page_num += 1
+                except KeyError as e:
+                    print(e)
+                    print()
+                    print('Saving and skipping')
+
+                    more_results = False
 
             df.to_pickle(f'data/{f}_{activity}.pkl')
             df.to_csv(f'data/{f}_{activity}.csv')
@@ -227,6 +236,7 @@ def getpage(page_num, f, activity):
     f = format_lookup[f]
     url = f'https://stats.espncricinfo.com/ci/engine/stats/index.html?class={f};filter=advanced;orderby=start;page={page_num};size=200;template=results;type={activity};view=innings'
     try:
+        print(url)
         webpage = requests.get(url).text
     except requests.exceptions.RequestException as e:
         print(f"This error occured: {e}")
