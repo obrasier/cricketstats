@@ -111,6 +111,8 @@ def team_data(values):
         declared = True
     
     opposition = opposition[2:]
+    start_date = parser.parse(start_date)
+
     if len(values) == 9:
         lead = np.nan
     page_values = [team, score, int(runs), overs, bpo, rpo, lead, all_out, declared, result, inns, opposition, ground, start_date]
@@ -186,11 +188,11 @@ def parse_page(df, soup, activity, f, last_row, can_append, data_types):
 def scrape_pages():
     for activity in ('batting', 'bowling', 'team',):
         if activity == 'batting':
-            data_types = {'mins': int, 'bf': int, '4s': int, '6s': int, 'sr': float}
+            data_types = {'mins': int, 'bf': int, '4s': int, '6s': int, 'sr': float, 'start_date': 'datetime64[ns]'}
         elif activity == 'bowling':
-            data_types = {'maidens': int, 'runs': int, 'wickets':int, 'bpo': int, 'balls': int, 'economy': float}
+            data_types = {'maidens': int, 'runs': int, 'wickets':int, 'bpo': int, 'balls': int, 'economy': float, 'start_date': 'datetime64[ns]'}
         elif activity == 'team':
-            data_types = {'runs': int, 'bpo': int, 'rpo': float, 'lead': int, 'innings': int}
+            data_types = {'runs': int, 'bpo': int, 'rpo': float, 'lead': int, 'innings': int, 'start_date': 'datetime64[ns]'}
 
         for f in format_lookup.keys():
             print(f'Starting format {f}')
