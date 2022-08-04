@@ -224,9 +224,8 @@ def scrape_pages():
                     time.sleep(0.5)
                     page_num += 1
                 except KeyError as e:
-                    print(e)
+                    print(f'Unknown team code: {e} (update teams.py). Saving and skipping')
                     print()
-                    print('Saving and skipping')
 
                     more_results = False
 
