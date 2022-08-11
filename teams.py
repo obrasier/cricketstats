@@ -205,4 +205,6 @@ team_lookup = {'AUS': 'Australia',
             'DNK-W': 'Denmk Women',
             'CRT': 'Croatia',
             'BRB-W': 'Barbados Women',
+            'SVN': 'Slovenia',
+            'SWZ': 'Eswatini',
             }
