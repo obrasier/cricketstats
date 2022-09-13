@@ -347,30 +347,30 @@ def scrape_pages():
     ):
         if activity == "batting":
             data_types = {
-                "mins": int,
-                "bf": int,
-                "4s": int,
-                "6s": int,
+                "mins": "Int32",
+                "bf": "Int32",
+                "4s": "Int32",
+                "6s": "Int32",
                 "sr": float,
                 "start_date": "datetime64[ns]",
             }
         elif activity == "bowling":
             data_types = {
-                "maidens": int,
-                "runs": int,
-                "wickets": int,
-                "bpo": int,
-                "balls": int,
+                "maidens": "Int32",
+                "runs": "Int32",
+                "wickets": "Int32",
+                "bpo": "Int32",
+                "balls": "Int32",
                 "economy": float,
                 "start_date": "datetime64[ns]",
             }
         elif activity == "team":
             data_types = {
-                "runs": int,
-                "bpo": int,
+                "runs": "Int32",
+                "bpo": "Int32",
                 "rpo": float,
-                "lead": int,
-                "innings": int,
+                "lead": "Int32",
+                "innings": "Int32",
                 "start_date": "datetime64[ns]",
             }
 
@@ -390,7 +390,7 @@ def scrape_pages():
                 last_row = None
                 can_append = True
 
-            df = df.astype(data_types, errors="ignore")
+            df = df.astype(data_types)
             more_results = True
             while more_results:
                 print(f"Scraping page {page_num}")

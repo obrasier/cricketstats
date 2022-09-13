@@ -216,4 +216,10 @@ team_lookup = {
     "BRB-W": "Barbados Women",
     "SVN": "Slovenia",
     "SWZ": "Eswatini",
+    "Fiji": "Fiji",
+    "MLT-W": "Malta Women",
+    "ROM-W": "Romania Women",
+    "COK": "Cook Islands",
+    "GRC-W": "Greece Women",
+    "SRB-W": "Serbia Women",
 }
