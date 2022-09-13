@@ -12,6 +12,7 @@ import os
 
 from teams import team_lookup, format_lookup, format_length
 
+cache_dir = os.getenv("STATSGURU_CACHE")
 page = 1
 pos = 1
 headings = [
@@ -314,7 +315,7 @@ def parse_page(df, soup, activity, f, last_row, can_append, data_types):
                 # at a table with no results. We've queried too many tables, so just return
                 # False
                 if values[0] == "No records available to match this query":
-                    return False, df, can_append
+                    return False, df, can_append, 0
                 # filter out all the empty string values
                 values = [x for x in values if x != ""]
                 values = [x if x != "-" else np.nan for x in values]
@@ -335,7 +336,7 @@ def parse_page(df, soup, activity, f, last_row, can_append, data_types):
                 df = df.append(page_df, ignore_index=True)
             # Return true to say that this page was parsed correctly
             print(df)
-            return True, df, can_append
+            return True, df, can_append, len(page_df)
 
 
 def scrape_pages():
@@ -397,12 +398,17 @@ def scrape_pages():
                 try:
                     soup = getpage(page_num, f, activity)
 
-                    more_results, df, can_append = parse_page(
+                    more_results, df, can_append, page_size = parse_page(
                         df, soup, activity, f, last_row, can_append, data_types
                     )
 
-                    # put a sleep in there so we don't hammer the cricinfo site too much
-                    time.sleep(0.5)
+                    # Always remove the last page visited as it may not be complete.
+                    if cache_dir is not None and os.path.exists(
+                        cache_path(page_num, f, activity)
+                    ):
+                        if not more_results or page_size < 200:
+                            os.remove(cache_path(page_num, f, activity))
+
                     page_num += 1
                 except KeyError as e:
                     print(
@@ -417,12 +423,27 @@ def scrape_pages():
     print("All done!")
 
 
+def cache_path(page_num, f, activity):
+    return f"{cache_dir}/{f}-{activity}-{page_num}.html"
+
+
 def getpage(page_num, f, activity):
-    f = format_lookup[f]
-    url = f"https://stats.espncricinfo.com/ci/engine/stats/index.html?class={f};filter=advanced;orderby=start;page={page_num};size=200;template=results;type={activity};view=innings"
+    from_cache = False
+    format_id = format_lookup[f]
+    url = f"https://stats.espncricinfo.com/ci/engine/stats/index.html?class={format_id};filter=advanced;orderby=start;page={page_num};size=200;template=results;type={activity};view=innings"
+
     try:
         print(url)
-        webpage = requests.get(url).text
+
+        if cache_dir is not None and os.path.exists(cache_path(page_num, f, activity)):
+            print(f"From cache: {cache_path(page_num, f, activity)}")
+            with open(cache_path(page_num, f, activity)) as c:
+                webpage = c.read()
+                from_cache = True
+        else:
+            # put a sleep in there so we don't hammer the cricinfo site too much
+            time.sleep(0.5)
+            webpage = requests.get(url).text
     except requests.exceptions.RequestException as e:
         print(f"This error occured: {e}")
         print()
@@ -431,8 +452,15 @@ def getpage(page_num, f, activity):
         webpage = requests.get(url).text
         pass
 
+    if cache_dir is not None and not from_cache:
+        with open(cache_path(page_num, f, activity), "w") as c:
+            c.write(webpage)
+
     soup = BeautifulSoup(webpage, features="html.parser")
     return soup
 
+
+if cache_dir is not None and not os.path.exists(cache_dir):
+    os.makedirs(cache_dir)
 
 scrape_pages()
