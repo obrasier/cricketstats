@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from selectolax.parser import HTMLParser
 from dateutil import parser
 import pandas as pd
 import numpy as np
@@ -314,19 +314,19 @@ def rows_equal(a, b):
     return True
 
 
-def parse_page(df, soup, activity, f, last_row, can_append, data_types):
+def parse_page(df, html, activity, f, last_row, can_append, data_types):
     global prev_data
     idx = get_idx[activity]
     format_str = f"{f}_{activity}"
-    for table in soup.findAll("table", class_="engineTable"):
+    for table in html.css("table.engineTable"):
         # There are a few table.engineTable in the page. We want the one that has the match
-        if table.find("caption", text="Innings by innings list") is not None:
+        if table.select("caption").text_contains("Innings by innings list"):
             # results caption
-            rows = table.findAll("tr", class_="data1")
+            rows = table.css("tr.data1")
             page_values = []
             page_size = 0
             for row in rows:
-                values = [i.text for i in row.findAll("td")]
+                values = [i.text() for i in row.css("td")]
 
                 # if the only result in the table says "No records...", this means that we're
                 # at a table with no results. We've queried too many tables, so just return
@@ -418,10 +418,10 @@ def scrape_pages():
                 print(f"Scraping page {page_num}")
 
                 try:
-                    soup = getpage(page_num, f, activity)
+                    html = getpage(page_num, f, activity)
 
                     more_results, df, can_append, page_size = parse_page(
-                        df, soup, activity, f, last_row, can_append, data_types
+                        df, html, activity, f, last_row, can_append, data_types
                     )
 
                     # Always remove the last page visited as it may not be complete.
@@ -478,8 +478,8 @@ def getpage(page_num, f, activity):
         with open(cache_path(page_num, f, activity), "w") as c:
             c.write(webpage)
 
-    soup = BeautifulSoup(webpage, features="html.parser")
-    return soup
+    html = HTMLParser(webpage)
+    return html
 
 
 if cache_dir is not None and not os.path.exists(cache_dir):
