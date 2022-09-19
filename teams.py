@@ -222,4 +222,5 @@ team_lookup = {
     "COK": "Cook Islands",
     "GRC-W": "Greece Women",
     "SRB-W": "Serbia Women",
+    "SWA": "Eswatini",
 }
