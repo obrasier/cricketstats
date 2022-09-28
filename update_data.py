@@ -77,7 +77,7 @@ def extract_player_team(player_raw):
     brackets = re.findall(r"\((.*?)\)", player_raw)
     player = player_raw[: player_raw.rfind("(")].strip()
     team_str = brackets[-1]
-    team = team_lookup[team_str]
+    team = team_lookup(team_str)
     return player, team
 
 
@@ -121,7 +121,7 @@ def bowling_data(values, prev_data):
         if len(overs_arr) > 1:
             balls += int(overs_arr[1])
 
-    opposition = opp_raw[2:]
+    opposition = team_lookup(opp_raw[2:])
     start_date = parser.parse(start_date)
     if not prev_data or prev_data != (innings, opposition, ground, start_date):
         pos = 1
@@ -173,7 +173,7 @@ def batting_data(values, prev_data):
         not_out = False
         runs = int(runs_txt)
 
-    opposition = opp_raw[2:]
+    opposition = team_lookup(opp_raw[2:])
     start_date = parser.parse(start_date)
 
     if not prev_data or prev_data != (inns, opposition, ground, start_date):
@@ -238,13 +238,13 @@ def team_data(values):
     if score[-1] == "d":
         declared = True
 
-    opposition = opposition[2:]
+    opposition = team_lookup(opposition[2:])
     start_date = parser.parse(start_date)
 
     if len(values) == 9:
         lead = np.nan
     page_values = [
-        team,
+        team_lookup(team),
         score,
         int(runs),
         overs,
@@ -285,7 +285,7 @@ def get_data(values, activity, prev_data, f):
     if start_date >= offset_date:
         page_values = []
 
-    opposition = opposition[2:]
+    opposition = team_lookup(opposition[2:])
     prev_data = (inns, opposition, ground, start_date)
     return page_values, prev_data
 
