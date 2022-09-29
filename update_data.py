@@ -32,6 +32,8 @@ headings = [
         "opposition",
         "ground",
         "start_date",
+        "player_id",
+        "match_id",
     ],
     [
         "player",
@@ -48,6 +50,8 @@ headings = [
         "opposition",
         "ground",
         "start_date",
+        "player_id",
+        "match_id",
     ],
     [
         "team",
@@ -64,6 +68,7 @@ headings = [
         "opposition",
         "ground",
         "start_date",
+        "match_id",
     ],
 ]
 # team,score,runs,overs,balls_per_over,rpo,lead,innings,result,opposition,ground,start_date,all_out_flag,declared_flag
@@ -314,6 +319,16 @@ def rows_equal(a, b):
     return True
 
 
+def id_from_link(link):
+    return re.search("(\d+).html", link.attributes["href"]).group(1)
+
+
+def match_link(row, html):
+    mouseover = row.css_first("td.padDD a").attributes["onmouseover"]
+    engine_dd_id = re.search("engine-dd\d+", mouseover).group(0)
+    return html.css_first(f"#{engine_dd_id} a[href*='/match/']")
+
+
 def parse_page(df, html, activity, f, last_row, can_append, data_types):
     global prev_data
     idx = get_idx[activity]
@@ -345,6 +360,11 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
                 page_size = page_size + 1
 
                 if len(row_values) > 0:
+                    if activity != "team":
+                        row_values.append(f"p{id_from_link(row.css_first('a'))}")
+
+                    row_values.append(f"m{id_from_link(match_link(row, html))}")
+
                     if last_row is not None and rows_equal(row_values, last_row):
                         can_append = True
                         page_values = []
