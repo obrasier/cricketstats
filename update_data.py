@@ -335,7 +335,7 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
     format_str = f"{f}_{activity}"
     for table in html.css("table.engineTable"):
         # There are a few table.engineTable in the page. We want the one that has the match
-        if table.select("caption").text_contains("Innings by innings list"):
+        if table.select("caption").text_contains("Innings by innings list").any_matches:
             # results caption
             rows = table.css("tr.data1")
             page_values = []
