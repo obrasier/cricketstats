@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from selectolax.parser import HTMLParser
 from dateutil import parser
 import pandas as pd
 import numpy as np
@@ -262,7 +262,7 @@ def team_data(values):
     return page_values
 
 
-def get_data(values, page_df, activity, prev_data, f, data_types):
+def get_data(values, activity, prev_data, f):
     if activity == "batting":
         page_values = batting_data(values, prev_data)
     elif activity == "bowling":
@@ -281,15 +281,13 @@ def get_data(values, page_df, activity, prev_data, f, data_types):
     if "test" in f:
         offset_date = datetime.today() - timedelta(days=5)
     else:
-        offset_date = datetime.today() - timedelta(days=2)
-    if start_date < offset_date:
-        series = pd.Series(page_values, index=headings[idx])
-        page_df = page_df.append(series, ignore_index=True)
+        offset_date = datetime.today() - timedelta(days=1)
+    if start_date >= offset_date:
+        page_values = []
 
-    page_df = page_df.astype(data_types, errors="ignore")
     opposition = opposition[2:]
     prev_data = (inns, opposition, ground, start_date)
-    return page_df, prev_data
+    return page_values, prev_data
 
 
 def is_nan(val):
@@ -298,18 +296,37 @@ def is_nan(val):
     return val != val
 
 
-def parse_page(df, soup, activity, f, last_row, can_append, data_types):
+# For numeric-looking values, convert both sides to the same type to
+# avoid formatting issues.
+def values_equal(a, b):
+    if type(a) is float or type(b) is float:
+        return str(float(a)) == str(float(b))
+    elif type(a) is int or type(b) is int:
+        return int(a) == int(b)
+    else:
+        return str(a) == str(b)
+
+
+def rows_equal(a, b):
+    for i, j in zip(a, b):
+        if not is_nan(i) and not values_equal(i, j):
+            return False
+    return True
+
+
+def parse_page(df, html, activity, f, last_row, can_append, data_types):
     global prev_data
     idx = get_idx[activity]
     format_str = f"{f}_{activity}"
-    for table in soup.findAll("table", class_="engineTable"):
+    for table in html.css("table.engineTable"):
         # There are a few table.engineTable in the page. We want the one that has the match
-        if table.find("caption", text="Innings by innings list") is not None:
+        if table.select("caption").text_contains("Innings by innings list"):
             # results caption
-            rows = table.findAll("tr", class_="data1")
-            page_df = pd.DataFrame(columns=headings[idx])
+            rows = table.css("tr.data1")
+            page_values = []
+            page_size = 0
             for row in rows:
-                values = [i.text for i in row.findAll("td")]
+                values = [i.text() for i in row.css("td")]
 
                 # if the only result in the table says "No records...", this means that we're
                 # at a table with no results. We've queried too many tables, so just return
@@ -319,24 +336,29 @@ def parse_page(df, soup, activity, f, last_row, can_append, data_types):
                 # filter out all the empty string values
                 values = [x for x in values if x != ""]
                 values = [x if x != "-" else np.nan for x in values]
-                # print(len(values))
+
                 if len(values) != format_length[format_str] or is_nan(values[1]):
                     print(values)
                     continue
 
-                page_df, prev_data = get_data(
-                    values, page_df, activity, prev_data, f, data_types
-                )
-                if not page_df.empty and page_df.iloc[-1].equals(last_row):
-                    can_append = True
-                    page_df = pd.DataFrame(columns=headings[idx])
-                    print("appending now.")
+                row_values, prev_data = get_data(values, activity, prev_data, f)
+                page_size = page_size + 1
+
+                if len(row_values) > 0:
+                    if last_row is not None and rows_equal(row_values, last_row):
+                        can_append = True
+                        page_values = []
+                        print("appending now.")
+                    else:
+                        page_values.append(row_values)
 
             if can_append:
-                df = df.append(page_df, ignore_index=True)
+                page_df = pd.DataFrame(columns=headings[idx], data=page_values)
+                page_df = page_df.astype(data_types)
+                df = pd.concat([df, page_df], ignore_index=True)
             # Return true to say that this page was parsed correctly
             print(df)
-            return True, df, can_append, len(page_df)
+            return True, df, can_append, page_size
 
 
 def scrape_pages():
@@ -382,7 +404,7 @@ def scrape_pages():
             if os.path.exists(f"data/{f}_{activity}.pkl"):
                 df = pd.read_pickle(f"data/{f}_{activity}.pkl")
                 page_num = (len(df) // 200) - 1
-                last_row = df.iloc[-1]
+                last_row = df.iloc[-1].to_dict().values()
                 can_append = False
             else:
                 df = pd.DataFrame(columns=headings[idx])
@@ -396,10 +418,10 @@ def scrape_pages():
                 print(f"Scraping page {page_num}")
 
                 try:
-                    soup = getpage(page_num, f, activity)
+                    html = getpage(page_num, f, activity)
 
                     more_results, df, can_append, page_size = parse_page(
-                        df, soup, activity, f, last_row, can_append, data_types
+                        df, html, activity, f, last_row, can_append, data_types
                     )
 
                     # Always remove the last page visited as it may not be complete.
@@ -456,8 +478,8 @@ def getpage(page_num, f, activity):
         with open(cache_path(page_num, f, activity), "w") as c:
             c.write(webpage)
 
-    soup = BeautifulSoup(webpage, features="html.parser")
-    return soup
+    html = HTMLParser(webpage)
+    return html
 
 
 if cache_dir is not None and not os.path.exists(cache_dir):
