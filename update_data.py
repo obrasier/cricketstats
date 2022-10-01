@@ -32,6 +32,8 @@ headings = [
         "opposition",
         "ground",
         "start_date",
+        "player_id",
+        "match_id",
     ],
     [
         "player",
@@ -48,6 +50,8 @@ headings = [
         "opposition",
         "ground",
         "start_date",
+        "player_id",
+        "match_id",
     ],
     [
         "team",
@@ -64,6 +68,7 @@ headings = [
         "opposition",
         "ground",
         "start_date",
+        "match_id",
     ],
 ]
 # team,score,runs,overs,balls_per_over,rpo,lead,innings,result,opposition,ground,start_date,all_out_flag,declared_flag
@@ -77,7 +82,7 @@ def extract_player_team(player_raw):
     brackets = re.findall(r"\((.*?)\)", player_raw)
     player = player_raw[: player_raw.rfind("(")].strip()
     team_str = brackets[-1]
-    team = team_lookup[team_str]
+    team = team_lookup(team_str)
     return player, team
 
 
@@ -121,7 +126,7 @@ def bowling_data(values, prev_data):
         if len(overs_arr) > 1:
             balls += int(overs_arr[1])
 
-    opposition = opp_raw[2:]
+    opposition = team_lookup(opp_raw[2:])
     start_date = parser.parse(start_date)
     if not prev_data or prev_data != (innings, opposition, ground, start_date):
         pos = 1
@@ -173,7 +178,7 @@ def batting_data(values, prev_data):
         not_out = False
         runs = int(runs_txt)
 
-    opposition = opp_raw[2:]
+    opposition = team_lookup(opp_raw[2:])
     start_date = parser.parse(start_date)
 
     if not prev_data or prev_data != (inns, opposition, ground, start_date):
@@ -238,13 +243,13 @@ def team_data(values):
     if score[-1] == "d":
         declared = True
 
-    opposition = opposition[2:]
+    opposition = team_lookup(opposition[2:])
     start_date = parser.parse(start_date)
 
     if len(values) == 9:
         lead = np.nan
     page_values = [
-        team,
+        team_lookup(team),
         score,
         int(runs),
         overs,
@@ -285,7 +290,7 @@ def get_data(values, activity, prev_data, f):
     if start_date >= offset_date:
         page_values = []
 
-    opposition = opposition[2:]
+    opposition = team_lookup(opposition[2:])
     prev_data = (inns, opposition, ground, start_date)
     return page_values, prev_data
 
@@ -314,13 +319,23 @@ def rows_equal(a, b):
     return True
 
 
+def id_from_link(link):
+    return re.search("(\d+).html", link.attributes["href"]).group(1)
+
+
+def match_link(row, html):
+    mouseover = row.css_first("td.padDD a").attributes["onmouseover"]
+    engine_dd_id = re.search("engine-dd\d+", mouseover).group(0)
+    return html.css_first(f"#{engine_dd_id} a[href*='/match/']")
+
+
 def parse_page(df, html, activity, f, last_row, can_append, data_types):
     global prev_data
     idx = get_idx[activity]
     format_str = f"{f}_{activity}"
     for table in html.css("table.engineTable"):
         # There are a few table.engineTable in the page. We want the one that has the match
-        if table.select("caption").text_contains("Innings by innings list"):
+        if table.select("caption").text_contains("Innings by innings list").any_matches:
             # results caption
             rows = table.css("tr.data1")
             page_values = []
@@ -345,6 +360,11 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
                 page_size = page_size + 1
 
                 if len(row_values) > 0:
+                    if activity != "team":
+                        row_values.append(f"p{id_from_link(row.css_first('a'))}")
+
+                    row_values.append(f"m{id_from_link(match_link(row, html))}")
+
                     if last_row is not None and rows_equal(row_values, last_row):
                         can_append = True
                         page_values = []
