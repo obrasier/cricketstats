@@ -117,7 +117,7 @@ teams = {
     "Mali": ["mli"],
     "France": ["fra", "fran"],
     "Singapor": ["sin"],
-    "South Korea": ["kor", "sk"],
+    "South Korea": ["kor", "sk", "skor"],
     "China": ["chn"],
     "Young England": ["yewmn", "y. eng"],
     "International XI": ["intwn", "int xi"],
