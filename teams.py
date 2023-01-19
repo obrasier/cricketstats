@@ -146,6 +146,7 @@ teams = {
     "World XI": ["world-xi"],
     "St Helena": ["sthel"],
     "Gambia": ["gambi"],
+    "Cambodia": ["cam"],
 }
 
 teams_inverted = {}
