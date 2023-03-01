@@ -171,7 +171,12 @@ def batting_data(values, prev_data):
     if "*" in runs_txt:
         not_out = True
         runs = int(runs_txt.replace("*", ""))
-    elif "DNB" in runs_txt or runs_txt == "absent" or runs_txt == "sub" or runs_txt == "CSUB":
+    elif (
+        "DNB" in runs_txt
+        or runs_txt == "absent"
+        or runs_txt == "sub"
+        or runs_txt == "CSUB"
+    ):
         runs = np.nan
         not_out = True
     else:
