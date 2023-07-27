@@ -108,7 +108,7 @@ teams = {
     "Iran": [],
     "Isle of Man": ["iom"],
     "Indonesia": ["ina", "indonesia wm"],
-    "Myanmar": ["mya"],
+    "Myanmar": ["mya", "myan"],
     "Rwanda": ["rwa", "rwn"],
     "Sierra Leone": ["sierra l", "sle"],
     "Japan": ["jpn"],
