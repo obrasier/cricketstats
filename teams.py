@@ -107,7 +107,7 @@ teams = {
     "Bhutan": ["bhu"],
     "Iran": [],
     "Isle of Man": ["iom"],
-    "Indonesia": ["ina", "indonesia wm"],
+    "Indonesia": ["ina", "indonesia wm", "indonesia w"],
     "Myanmar": ["mya", "myan"],
     "Rwanda": ["rwa", "rwn"],
     "Sierra Leone": ["sierra l", "sle"],
@@ -145,6 +145,7 @@ teams = {
     "World XI": ["world-xi"],
     "St Helena": ["sthel"],
     "Cambodia": ["cam"],
+    "Mongolia": ["mng"],
 }
 
 teams_inverted = {}
