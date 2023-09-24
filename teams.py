@@ -34,12 +34,12 @@ format_length = {
 teams = {
     "Australia": ["aus"],
     "England": ["eng"],
-    "South Africa": ["sa"],
-    "West Indies": ["wi"],
+    "South Africa": ["sa", "s africa"],
+    "West Indies": ["wi", "w indies"],
     "New Zealand": ["nz"],
     "India": ["ind"],
     "Pakistan": ["pak"],
-    "Sri Lanka": ["sl"],
+    "Sri Lanka": ["sl", "s lanka"],
     "Zimbabwe": ["zim"],
     "Bangladesh": ["ban", "bd", "bdesh"],
     "ICC World XI": ["icc", "world"],
@@ -158,6 +158,6 @@ for team, keys in teams.items():
 
 
 def team_lookup(team):
-    canonical = re.sub(r"(-w| (women|wmn))$", "", team.lower())
+    canonical = re.sub(r"(-w| ?(women|wmn|\(w\)))$", "", team.lower())
 
     return teams_inverted[canonical]
