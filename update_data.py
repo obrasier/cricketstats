@@ -280,6 +280,7 @@ def get_data(values, activity, prev_data, f):
     elif activity == "team":
         page_values = team_data(values)
 
+    skipped = False
     idx = get_idx[activity]
     inns, opposition, ground, start_date = (
         values[-4],
@@ -294,10 +295,11 @@ def get_data(values, activity, prev_data, f):
         offset_date = datetime.today() - timedelta(days=1)
     if start_date >= offset_date:
         page_values = []
+        skipped = True
 
     opposition = team_lookup(opposition[2:])
     prev_data = (inns, opposition, ground, start_date)
-    return page_values, prev_data
+    return page_values, prev_data, skipped
 
 
 def is_nan(val):
@@ -338,6 +340,7 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
     global prev_data
     idx = get_idx[activity]
     format_str = f"{f}_{activity}"
+    skip_cache = False
     for table in html.css("table.engineTable"):
         # There are a few table.engineTable in the page. We want the one that has the match
         if table.select("caption").text_contains("Innings by innings list").any_matches:
@@ -352,7 +355,7 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
                 # at a table with no results. We've queried too many tables, so just return
                 # False
                 if values[0] == "No records available to match this query":
-                    return False, df, can_append, 0
+                    return False, df, can_append, 0, True
                 # filter out all the empty string values
                 values = [x for x in values if x != ""]
                 values = [x if x != "-" else np.nan for x in values]
@@ -361,8 +364,11 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
                     print(values)
                     continue
 
-                row_values, prev_data = get_data(values, activity, prev_data, f)
+                row_values, prev_data, skipped = get_data(values, activity, prev_data, f)
                 page_size = page_size + 1
+
+                if skipped:
+                    skip_cache = True
 
                 if len(row_values) > 0:
                     if activity != "team":
@@ -383,7 +389,7 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
                 df = pd.concat([df, page_df], ignore_index=True)
             # Return true to say that this page was parsed correctly
             print(df)
-            return True, df, can_append, page_size
+            return True, df, can_append, page_size, skip_cache
 
 
 def scrape_pages():
@@ -445,7 +451,7 @@ def scrape_pages():
                 try:
                     html = getpage(page_num, f, activity)
 
-                    more_results, df, can_append, page_size = parse_page(
+                    more_results, df, can_append, page_size, skip_cache = parse_page(
                         df, html, activity, f, last_row, can_append, data_types
                     )
 
@@ -453,7 +459,7 @@ def scrape_pages():
                     if cache_dir is not None and os.path.exists(
                         cache_path(page_num, f, activity)
                     ):
-                        if not more_results or page_size < 200:
+                        if not more_results or page_size < 200 or skip_cache:
                             os.remove(cache_path(page_num, f, activity))
 
                     page_num += 1
