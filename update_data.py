@@ -364,7 +364,9 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
                     print(values)
                     continue
 
-                row_values, prev_data, skipped = get_data(values, activity, prev_data, f)
+                row_values, prev_data, skipped = get_data(
+                    values, activity, prev_data, f
+                )
                 page_size = page_size + 1
 
                 if skipped:
