@@ -13,6 +13,7 @@ import os
 from teams import team_lookup, format_lookup, format_length
 
 cache_dir = os.getenv("STATSGURU_CACHE")
+apify_token = os.getenv("APIFY_TOKEN")
 page = 1
 pos = 1
 headings = [
@@ -497,8 +498,8 @@ def getpage(page_num, f, activity):
                 from_cache = True
         else:
             # put a sleep in there so we don't hammer the cricinfo site too much
-            time.sleep(0.5)
-            webpage = requests.get(url).text
+            time.sleep(15)
+            webpage = fetch_body(url)
     except requests.exceptions.RequestException as e:
         print(f"This error occured: {e}")
         print()
@@ -513,6 +514,24 @@ def getpage(page_num, f, activity):
 
     html = HTMLParser(webpage)
     return html
+
+
+def fetch_body(url):
+    if apify_token:
+        defaults = {
+            "pageFunction": "async function pageFunction(context) { return { body: context.body }; }"
+        }
+        run = requests.post(
+            f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/run-sync?token={apify_token}&timeout=30&outputRecordKey=body",
+            json={**defaults, "startUrls": [{"url": url}]},
+        )
+        run.raise_for_status()
+        dataset = requests.get(
+            f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/runs/last/dataset/items?actorTaskId=YrQuEkowkNCLdk4j2&token={apify_token}"
+        ).json()
+        return dataset[0]["body"]
+
+    return requests.get(url, timeout=10)
 
 
 if cache_dir is not None and not os.path.exists(cache_dir):
