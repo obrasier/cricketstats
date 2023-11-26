@@ -158,6 +158,6 @@ for team, keys in teams.items():
 
 
 def team_lookup(team):
-    canonical = re.sub(r"(-w| ?(women|wmn|\(w\)))$", "", team.lower())
+    canonical = re.sub(r"([- ]w| ?(women|wmn|\(w\)))$", "", team.lower())
 
     return teams_inverted[canonical]
