@@ -524,10 +524,12 @@ def fetch_body(url):
         run = requests.post(
             f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/run-sync?token={apify_token}&timeout=30&outputRecordKey=body",
             json={**defaults, "startUrls": [{"url": url}]},
+            timeout=60,
         )
         run.raise_for_status()
         dataset = requests.get(
-            f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/runs/last/dataset/items?actorTaskId=YrQuEkowkNCLdk4j2&token={apify_token}"
+            f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/runs/last/dataset/items?actorTaskId=YrQuEkowkNCLdk4j2&token={apify_token}",
+            timeout=60,
         ).json()
         return dataset[0]["body"]
 
