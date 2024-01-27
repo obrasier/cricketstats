@@ -466,6 +466,13 @@ def scrape_pages():
                             os.remove(cache_path(page_num, f, activity))
 
                     page_num += 1
+                except TypeError as e:
+                    remove_path = cache_path(page_num, f, activity)
+                    print(f"Bad cache entry found, removing: {remove_path}")
+                    print()
+
+                    os.remove(remove_path)
+                    raise e
                 except KeyError as e:
                     print(
                         f"Unknown team code: {e} (update teams.py). Saving and skipping"
