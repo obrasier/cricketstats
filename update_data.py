@@ -529,9 +529,9 @@ def fetch_body(url):
             "pageFunction": "async function pageFunction(context) { return { body: context.body }; }"
         }
         run = requests.post(
-            f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/run-sync?token={apify_token}&timeout=30&outputRecordKey=body",
+            f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/run-sync?token={apify_token}&timeout=60&outputRecordKey=body",
             json={**defaults, "startUrls": [{"url": url}]},
-            timeout=60,
+            timeout=90,
         )
         run.raise_for_status()
         dataset = requests.get(
