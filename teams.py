@@ -85,7 +85,7 @@ teams = {
     "Norway": ["nor"],
     "Denmark": ["den", "denmk", "dnk"],
     "Thailand": ["thai", "thi"],
-    "Malaysia": ["mal"],
+    "Malaysia": ["mal", "mas"],
     "Samoa": ["samwn", "sam"],
     "Finland": ["fin"],
     "Singapore": ["sgp", "spore"],
