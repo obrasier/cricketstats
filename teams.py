@@ -101,7 +101,7 @@ teams = {
     "Serbia": ["srb"],
     "Bulgaria": ["bul"],
     "Portugal": ["port"],
-    "Gibraltar": ["gibr"],
+    "Gibraltar": ["gibr", "gib"],
     "Mozambique": ["moz"],
     "Malawi": ["mlw", "mwi"],
     "Bhutan": ["bhu"],
