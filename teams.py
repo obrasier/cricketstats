@@ -138,7 +138,7 @@ teams = {
     "Saudia Arabia": ["ksa"],
     "Gambia": ["gam", "gambi"],
     "Israel": ["isr"],
-    "Croatia": ["crt"],
+    "Croatia": ["crt", "cro"],
     "Barbados": ["brb"],
     "Slovenia": ["svn"],
     "Cook Islands": ["cok"],
