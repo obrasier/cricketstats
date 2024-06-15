@@ -94,7 +94,7 @@ teams = {
     "Austria": ["aut"],
     "Turkey": ["tky"],
     "Luxembourg": ["lux"],
-    "Czech Republic": ["czk-r", "czech rep."],
+    "Czech Republic": ["czk-r", "czech rep.", "cze", "czech"],
     "Argentina": ["arg"],
     "Chile": ["chi"],
     "Peru": ["per"],
