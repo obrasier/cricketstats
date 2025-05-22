@@ -100,7 +100,7 @@ teams = {
     "Peru": ["per"],
     "Serbia": ["srb"],
     "Bulgaria": ["bul"],
-    "Portugal": ["port"],
+    "Portugal": ["port", "por"],
     "Gibraltar": ["gibr", "gib"],
     "Mozambique": ["moz"],
     "Malawi": ["mlw", "mwi"],
@@ -136,7 +136,7 @@ teams = {
     "Switzerland": ["sui"],
     "Bahamas": ["bhm"],
     "Saudia Arabia": ["ksa"],
-    "Gambia": ["gam", "gambi"],
+    "Gambia": ["gam", "gambi", "gmb"],
     "Israel": ["isr"],
     "Croatia": ["crt", "cro"],
     "Barbados": ["brb"],
@@ -146,6 +146,10 @@ teams = {
     "St Helena": ["sthel"],
     "Cambodia": ["cam"],
     "Mongolia": ["mng"],
+    "Cote D'Ivoire": ["ivory coast", "civ"],
+    "Suriname": ["sur"],
+    "Falkland Islands": ["falk", "falkland isl"],
+    "Turks and Caicos Islands": ["t & c island", "tcl"],
 }
 
 teams_inverted = {}
