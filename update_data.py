@@ -347,6 +347,7 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
         if table.select("caption").text_contains("Innings by innings list").any_matches:
             # results caption
             rows = table.css("tr.data1")
+            parsed_rows = []
             page_values = []
             page_size = 0
             for row in rows:
@@ -378,13 +379,16 @@ def parse_page(df, html, activity, f, last_row, can_append, data_types):
                         row_values.append(f"p{id_from_link(row.css_first('a'))}")
 
                     row_values.append(f"m{id_from_link(match_link(row, html))}")
+                    parsed_rows.append(row_values)
 
-                    if last_row is not None and rows_equal(row_values, last_row):
-                        can_append = True
-                        page_values = []
-                        print("appending now.")
-                    else:
-                        page_values.append(row_values)
+            key_pos = -2 if activity == "team" else -3
+            for row_values in sorted(parsed_rows, key=lambda x: x[key_pos]):
+                if last_row is not None and rows_equal(row_values, last_row):
+                    can_append = True
+                    page_values = []
+                    print("appending now.")
+                else:
+                    page_values.append(row_values)
 
             if can_append:
                 page_df = pd.DataFrame(columns=headings[idx], data=page_values)
@@ -540,7 +544,7 @@ def fetch_body(url):
         ).json()
         return dataset[0]["body"]
 
-    return requests.get(url, timeout=10)
+    return requests.get(url, timeout=10).text
 
 
 if cache_dir is not None and not os.path.exists(cache_dir):
