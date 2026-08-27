@@ -90,7 +90,7 @@ teams = {
     "Finland": ["fin"],
     "Singapore": ["sgp", "spore"],
     "Cayman Islands": ["caym", "cayman is", "cay", "cayman", "caywm"],
-    "Romania": ["rom"],
+    "Romania": ["rom", "rou"],
     "Austria": ["aut"],
     "Turkey": ["tky"],
     "Luxembourg": ["lux"],
@@ -150,6 +150,9 @@ teams = {
     "Suriname": ["sur"],
     "Falkland Islands": ["falk", "falkland isl"],
     "Turks and Caicos Islands": ["t & c island", "tcl"],
+    "Timor-Leste": ["tls"],
+    "Zambia": ["zam", "zmb"],
+    "Uzbekistan": ["uzb"],
 }
 
 teams_inverted = {}
