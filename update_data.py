@@ -513,6 +513,9 @@ def getpage(page_num, f, activity):
             webpage = fetch_body(url)
     except requests.exceptions.RequestException as e:
         print(f"This error occured: {e}")
+        if e.response is not None:
+            print(f"Status: {e.response.status_code}")
+            print(f"Body: {e.response.text}")
         print()
         print("Sleeping and trying again in 5 seconds...")
         time.sleep(5)
@@ -530,12 +533,13 @@ def getpage(page_num, f, activity):
 def fetch_body(url):
     if apify_token:
         defaults = {
-            "pageFunction": "async function pageFunction(context) { return { body: context.body }; }"
+            "pageFunction": "async function pageFunction(context) { return { body: context.body }; }",
+            "timeout": 100,
         }
         run = requests.post(
             f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/run-sync?token={apify_token}&timeout=60&outputRecordKey=body",
             json={**defaults, "startUrls": [{"url": url}]},
-            timeout=90,
+            timeout=120,
         )
         run.raise_for_status()
         dataset = requests.get(
