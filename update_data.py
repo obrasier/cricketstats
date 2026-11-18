@@ -530,25 +530,36 @@ def getpage(page_num, f, activity):
     return html
 
 
-def fetch_body(url):
-    if apify_token:
-        defaults = {
-            "pageFunction": "async function pageFunction(context) { return { body: context.body }; }",
-            "timeout": 100,
-        }
-        run = requests.post(
-            f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/run-sync?token={apify_token}&timeout=60&outputRecordKey=body",
-            json={**defaults, "startUrls": [{"url": url}]},
-            timeout=120,
-        )
-        run.raise_for_status()
-        dataset = requests.get(
-            f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/runs/last/dataset/items?actorTaskId=YrQuEkowkNCLdk4j2&token={apify_token}",
-            timeout=60,
-        ).json()
-        return dataset[0]["body"]
+def fetch_body(url, max_retries=5):
+    for attempt in range(max_retries):
+        if apify_token:
+            defaults = {
+                "pageFunction": "async function pageFunction(context) { return { body: context.body }; }",
+                "timeout": 100,
+            }
+            run = requests.post(
+                f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/run-sync?token={apify_token}&timeout=60&outputRecordKey=body",
+                json={**defaults, "startUrls": [{"url": url}]},
+                timeout=120,
+            )
+            run.raise_for_status()
 
-    return requests.get(url, timeout=10).text
+            dataset = requests.get(
+                f"https://api.apify.com/v2/acts/YrQuEkowkNCLdk4j2/runs/last/dataset/items?actorTaskId=YrQuEkowkNCLdk4j2&token={apify_token}",
+                timeout=60,
+            ).json()
+
+            body = dataset[0]["body"]
+        else:
+            body = requests.get(url, timeout=10).text
+
+        if body.strip() != "This Page is under maintenance":
+            return body
+
+        if attempt < max_retries - 1:
+            time.sleep(5)
+
+    return body
 
 
 if cache_dir is not None and not os.path.exists(cache_dir):
